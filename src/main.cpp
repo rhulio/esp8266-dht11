@@ -1,10 +1,15 @@
 #include <ESP8266WiFi.h>
-#include <ESP8266HTTPClient.h>
+//#include <ESP8266HTTPClient.h>
 
 #include <Adafruit_Sensor.h> 
-#include <DHTesp.h>
+#include <DHT.h>
 
-DHTesp dht(5, DHT11);
+DHT dht(5, DHT11);
+
+#include <MQTT.h>
+
+WiFiClient net;
+MQTTClient mqtt;
 
 float dadosTemperatura = 0;
 float dadosUmidade = 0;
@@ -12,7 +17,8 @@ float dadosUmidade = 0;
 const char* ssid = "# Cipriano";
 const char* senha = "globo321";
 
-const String token = "53027A";
+//const String token = "53027A";
+const char* token = "53027A";
 
 String float2str(float x, byte precision = 2) {
   char tmp[50];
@@ -46,8 +52,12 @@ void setup() {
   
   conectaWiFi();
   dht.begin();
+
+  mqtt.begin("mqtt.rscada.ga", net);
+  mqtt.connect(token, token, token);
 }
 
+/*
 String WiFiGET(String link) {
   if (!conectaWiFi()) return "";
 
@@ -67,6 +77,7 @@ String WiFiGET(String link) {
   http.end(); // Encerra conexão HTTP.
   return "";
 }
+*/
 
 unsigned long tempoTotal = 0;
   
@@ -91,10 +102,15 @@ void loop() {
       dadosGet = "umidade="+float2str(umidade)+"&temperatura="+float2str(temperatura);
     
     
-    String webservice = WiFiGET("http://sistema.rscada.ga/api/"+token+"/envio?"+dadosGet);
-
-    tempoTotal = millis() - tempoInicial;
-    
+    //String webservice = WiFiGET("http://sistema.rscada.ga/api/"+token+"/envio?"+dadosGet);
+    if(mqtt.connect(token, token, token)){
+      mqtt.publish(String(token)+"/umidade", float2str(umidade));
+      tempoTotal = millis() - tempoInicial;
+      
+      mqtt.publish(String(token)+"/temperatura", float2str(temperatura));
+      mqtt.publish(String(token)+"/latencia", String(tempoTotal));
+    }
+   
     while((millis() - tempoInicial) < 200) wdt();
   }
   wdt();
