@@ -85,8 +85,6 @@ void loop() {
   if(conectaWiFi()){
     unsigned long tempoInicial = millis();
 
-    String dadosGet = "";
-
     float umidade = dht.readHumidity();
     float temperatura = dht.readTemperature();
 
@@ -96,20 +94,30 @@ void loop() {
       return;
     }
 
+    /*
+    String dadosGet = "";
+
     if(tempoTotal > 0)
       dadosGet = "umidade="+float2str(umidade)+"&temperatura="+float2str(temperatura)+"&latencia="+String(tempoTotal);
     else
       dadosGet = "umidade="+float2str(umidade)+"&temperatura="+float2str(temperatura);
-    
-    
-    //String webservice = WiFiGET("http://sistema.rscada.ga/api/"+token+"/envio?"+dadosGet);
-    if(mqtt.connect(token, token, token)){
-      mqtt.publish(String(token)+"/umidade", float2str(umidade));
+
+    String webservice = WiFiGET("http://sistema.rscada.ga/api/"+token+"/envio?"+dadosGet);
+    */
+
+    if(mqtt.connected()){
+      mqtt.publish(String(token)+"/umidade", float2str(umidade), false, 1);
       tempoTotal = millis() - tempoInicial;
-      
-      mqtt.publish(String(token)+"/temperatura", float2str(temperatura));
-      mqtt.publish(String(token)+"/latencia", String(tempoTotal));
-    }
+
+      mqtt.publish(String(token)+"/temperatura", float2str(temperatura), false, 1);
+
+      if(tempoTotal > 0){
+        mqtt.publish(String(token)+"/latencia", String(tempoTotal), false, 1);
+        Serial.println("[MQTT] Informações enviadas ao servidor.\nLatência: "+String(tempoTotal)+" ms - Temperatura: "+float2str(temperatura)+" ºC - Umidade: "+float2str(umidade)+" %");
+      } else
+        Serial.println("[MQTT] Informações enviadas ao servidor.\nTemperatura: "+float2str(temperatura)+" ºC - Umidade: "+float2str(umidade)+" %");
+    } else
+      mqtt.connect(token, token, token);
    
     while((millis() - tempoInicial) < 200) wdt();
   }
