@@ -28,7 +28,7 @@ String float2str(float x, byte precision = 2) {
 
 bool conectaWiFi() {
   if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("[WiFi] Conectando...");
+    Serial.println("[WiFi] Conectando à "+String(ssid)+"...");
     delay(250);
     return 0;
   } else
@@ -116,8 +116,10 @@ void loop() {
         Serial.println("[MQTT] Informações enviadas ao servidor.\nLatência: "+String(tempoTotal)+" ms - Temperatura: "+float2str(temperatura)+" ºC - Umidade: "+float2str(umidade)+" %");
       } else
         Serial.println("[MQTT] Informações enviadas ao servidor.\nTemperatura: "+float2str(temperatura)+" ºC - Umidade: "+float2str(umidade)+" %");
-    } else
+    } else {
+      mqtt.disconnect();
       mqtt.connect(token, token, token);
+    }
    
     while((millis() - tempoInicial) < 200) wdt();
   }
