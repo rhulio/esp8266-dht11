@@ -1,3 +1,10 @@
+/*
+RScada v0.1a
+Projeto com a finalidade de medição temperatura e umidade.
+Envio: MQTT
+Programação: Arduino
+*/
+
 #include <ESP8266WiFi.h>
 //#include <ESP8266HTTPClient.h>
 
