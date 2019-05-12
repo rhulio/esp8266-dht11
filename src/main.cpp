@@ -93,7 +93,6 @@ unsigned long tempoTotal = 0;
   
 void loop() {
   if(conectaWiFi()){
-    unsigned long tempoInicial = millis();
 
     float umidade = dht.readHumidity();
     float temperatura = dht.readTemperature();
@@ -103,6 +102,8 @@ void loop() {
       wdt();
       return;
     }
+  
+    unsigned long tempoInicial = millis();
 
     /*
     String dadosGet = "";
